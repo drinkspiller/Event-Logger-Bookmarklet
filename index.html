@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <title>Event Logger Bookmarklet</title>
+    <style>
+      body {
+        background-color: #f4f4f4;
+        font-family: sans-serif;
+        line-height: 1.6;
+        padding: 20px;
+      }
+      h1,
+      h2,
+      h3 {
+        color: #333;
+      }
+      p {
+        color: #555;
+        margin-bottom: 15px;
+      }
+      .bookmarklet-link {
+        background-color: #007bff;
+        border-radius: 5px;
+        border: 1px solid #0056b3;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        color: white;
+        cursor: grab;
+        display: inline-block;
+        font-weight: bold;
+        padding: 10px 20px;
+        text-decoration: none;
+        transition: background-color 0.2s ease, box-shadow 0.2s ease;
+      }
+      .bookmarklet-link:hover {
+        background-color: #0056b3;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      }
+      .note {
+        background-color: #eef;
+        border-left: 5px solid #66f;
+        margin-top: 5px;
+        padding: 10px 15px;
+      }
+      .warning {
+        background-color: rgb(255, 218, 214);
+        border-left: 5px solid #b42812;
+        margin-top: 5px;
+        padding: 10px 15px;
+      }
+      .fa-triangle-exclamation {
+        color: #b42812;
+        margin-right: 5px;
+      }
+      code {
+        background-color: #eee;
+        border-radius: 3px;
+        font-family: monospace;
+        padding: 2px 4px;
+      }
+      pre {
+        background-color: #eee;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 10px;
+        overflow-x: auto;
+      }
+      .demo-area {
+        border: 2px dashed #aaa;
+        border-radius: 8px;
+        background-color: #fff;
+        height: 200px;
+        padding: 15px;
+        margin-top: 25px;
+        display: flex;
+        gap: 15px;
+        align-items: flex-start;
+        overflow: hidden;
+      }
+      .demo-area > div {
+        flex: 1;
+      }
+      .demo-area label {
+        color: #444;
+        display: block;
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+      .demo-area .radio-group label {
+        display: inline-block;
+        margin-bottom: 0;
+        vertical-align: middle;
+      }
+
+      .demo-area .radio-group input[type="radio"] {
+        margin: 0 3px 0 0;
+        vertical-align: middle;
+      }
+
+      .demo-area .radio-group {
+        margin-bottom: 13px;
+      }
+
+      .demo-area input[type="text"],
+      .demo-area select,
+      .demo-area button {
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        box-sizing: border-box;
+        margin-bottom: 10px;
+        padding: 8px 10px;
+        width: 100%;
+      }
+      .demo-area button {
+        background-color: #28a745;
+        color: white;
+        cursor: pointer;
+        border: none;
+        transition: background-color 0.2s ease;
+      }
+      .demo-area button:hover {
+        background-color: #218838;
+      }
+      .demo-area .radio-group label {
+        font-weight: normal;
+        margin-right: 10px;
+      }
+      .demo-area .scrollable-text {
+        border: 1px solid #eee;
+        background-color: #f9f9f9;
+        height: 150px;
+        overflow-y: scroll;
+        padding: 10px;
+        font-size: 0.9em;
+        color: #666;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Event Logger Bookmarklet</h1>
+    <p>
+      This bookmarklet allows you to log various events occurring on any
+      webpage. It captures mouse, keyboard, touch, and other events, providing
+      detailed information in the developer console.
+    </p>
+
+    <h2>Instructions</h2>
+    <ol>
+      <li>Drag the button below to your browser's bookmarks bar.</li>
+      <li>
+        Navigate to any webpage (or use the demo area below) and click the
+        bookmarklet in your bar to start logging events for that page in the
+        developer console.
+      </li>
+      <li>
+        Open the developer console (typically, F12 will open the browser's
+        developer console) and start interacting with the page.
+        <p class="note">
+          <strong>Note:</strong> Some websites might have security policies
+          (Content Security Policy - CSP) that prevent bookmarklets from running
+          correctly.
+        </p>
+      </li>
+    </ol>
+
+    <h3>Drag This Button to Your Bookmarks Bar:</h3>
+    <p>
+      <a id="bookmarklet" href="" class="bookmarklet-link">Log Events</a>
+    </p>
+
+    <h2>Test Area</h2>
+    <p>After activating the bookmarklet and opening the browser's developer
+      console, interact with the elements below to see the corresponding events
+      logged.</p>
+    <div class="demo-area" id="demo-zone">
+      <div>
+        <label for="demo-input">Text Input:</label>
+        <input type="text" id="demo-input" placeholder="Type here..." />
+
+        <label for="demo-button">Clickable Button:</label>
+        <button id="demo-button">Click Me</button>
+      </div>
+
+      <div>
+        <label>Radio Options:</label>
+        <div class="radio-group">
+          <input type="radio" id="radio1" name="demo-radio" value="option1" />
+          <label for="radio1">Option 1</label>
+          <input type="radio" id="radio2" name="demo-radio" value="option2" />
+          <label for="radio2">Option 2</label>
+        </div>
+
+        <label for="demo-select">Select Dropdown:</label>
+        <select id="demo-select">
+          <option value="">--Select--</option>
+          <option value="A">Choice A</option>
+          <option value="B">Choice B</option>
+          <option value="C">Choice C</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="scroll-div">Scrollable Div:</label>
+        <div class="scrollable-text" id="scroll-div">
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. In id
+            congue lorem. Proin porttitor nunc eu convallis faucibus. Mauris in
+            turpis tortor. Nullam condimentum consectetur urna, sed placerat
+            diam vehicula eu. In lacinia laoreet dui, sed tempus diam semper eu.
+            Quisque imperdiet, diam vitae volutpat tempus, justo mi egestas
+            arcu, sed tempor neque velit pulvinar elit. Integer felis velit,
+            sagittis ac accumsan in, vulputate sit amet augue. Phasellus
+            interdum, mi sed pharetra dignissim, tortor augue tristique eros, et
+            porttitor tellus lacus et magna. Curabitur sed vulputate urna.
+            Aliquam eget ligula nunc. Class aptent taciti sociosqu ad litora
+            torquent per conubia nostra, per inceptos himenaeos. Cras feugiat
+            nibh eu tortor accumsan, vel iaculis purus suscipit. Aliquam
+            sagittis mauris orci, sed feugiat urna elementum nec.
+          </p>
+
+          <p>
+            Mauris vestibulum mauris eget pharetra volutpat. Sed cursus sit amet
+            sapien ac bibendum. In ut luctus velit, quis fringilla lectus.
+            Vivamus at molestie ligula, pulvinar maximus libero. Aliquam luctus
+            arcu quis ligula rhoncus, at mattis neque blandit. Morbi at risus
+            mattis, cursus dolor vitae, accumsan eros. Aliquam gravida malesuada
+            sem, vitae tincidunt sem vehicula quis. Maecenas dignissim auctor
+            neque, sollicitudin sollicitudin turpis interdum quis. Donec orci
+            purus, imperdiet ac dapibus et, aliquam id nisl. Maecenas porta leo
+            id lacus semper, eu aliquam ligula tristique.
+          </p>
+
+          <p>
+            Nam mollis volutpat est, ut vestibulum nisi interdum sit amet.
+            Praesent pharetra purus porttitor risus consequat, sed vulputate
+            ligula congue. Donec rutrum dolor vitae blandit tempor. Sed accumsan
+            congue mauris at vehicula. Cras quam ex, lacinia et sagittis
+            viverra, tincidunt ac felis. Curabitur tincidunt lorem in lorem
+            sodales, sit amet consectetur leo scelerisque. Phasellus malesuada
+            condimentum imperdiet.
+          </p>
+
+          <p>
+            Maecenas ac leo nisl. Vivamus nulla lorem, gravida sed posuere a,
+            ornare sit amet lacus. Nulla vulputate libero purus, in ornare diam
+            varius et. In sodales odio felis, ac venenatis ligula tristique sed.
+            Praesent dapibus, libero id varius suscipit, nunc mauris condimentum
+            leo, placerat placerat turpis velit vel tortor. Nulla sagittis
+            mauris eu nibh scelerisque, a efficitur mi rutrum. Cras ut massa
+            dignissim, dignissim dolor sit amet, tincidunt lorem.
+          </p>
+
+          <p>
+            Mauris condimentum ornare dolor, id pellentesque libero finibus eu.
+            Donec cursus, dolor sed fringilla accumsan, ante metus malesuada
+            dolor, vel tincidunt dui diam pharetra orci. Nullam tortor velit,
+            elementum at ultrices vitae, condimentum in neque. Mauris mollis
+            ligula magna, vel efficitur nulla maximus et. Curabitur sed augue id
+            nibh placerat tristique non id felis. Vestibulum nibh tellus,
+            lobortis ut leo at, tristique gravida augue. Phasellus mollis
+            porttitor lectus sit amet pellentesque. Vestibulum ornare massa
+            ligula, at consectetur nisi convallis eget. Mauris tincidunt sapien
+            at lorem tincidunt, sed auctor risus auctor. Sed tellus ligula,
+            tincidunt a dictum sit amet, tristique a nulla.
+          </p>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. In id
+            congue lorem. Proin porttitor nunc eu convallis faucibus. Mauris in
+            turpis tortor. Nullam condimentum consectetur urna, sed placerat
+            diam vehicula eu. In lacinia laoreet dui, sed tempus diam semper eu.
+            Quisque imperdiet, diam vitae volutpat tempus, justo mi egestas
+            arcu, sed tempor neque velit pulvinar elit. Integer felis velit,
+            sagittis ac accumsan in, vulputate sit amet augue. Phasellus
+            interdum, mi sed pharetra dignissim, tortor augue tristique eros, et
+            porttitor tellus lacus et magna. Curabitur sed vulputate urna.
+            Aliquam eget ligula nunc. Class aptent taciti sociosqu ad litora
+            torquent per conubia nostra, per inceptos himenaeos. Cras feugiat
+            nibh eu tortor accumsan, vel iaculis purus suscipit. Aliquam
+            sagittis mauris orci, sed feugiat urna elementum nec.
+          </p>
+
+          <p>
+            Mauris vestibulum mauris eget pharetra volutpat. Sed cursus sit amet
+            sapien ac bibendum. In ut luctus velit, quis fringilla lectus.
+            Vivamus at molestie ligula, pulvinar maximus libero. Aliquam luctus
+            arcu quis ligula rhoncus, at mattis neque blandit. Morbi at risus
+            mattis, cursus dolor vitae, accumsan eros. Aliquam gravida malesuada
+            sem, vitae tincidunt sem vehicula quis. Maecenas dignissim auctor
+            neque, sollicitudin sollicitudin turpis interdum quis. Donec orci
+            purus, imperdiet ac dapibus et, aliquam id nisl. Maecenas porta leo
+            id lacus semper, eu aliquam ligula tristique.
+          </p>
+
+          <p>
+            Nam mollis volutpat est, ut vestibulum nisi interdum sit amet.
+            Praesent pharetra purus porttitor risus consequat, sed vulputate
+            ligula congue. Donec rutrum dolor vitae blandit tempor. Sed accumsan
+            congue mauris at vehicula. Cras quam ex, lacinia et sagittis
+            viverra, tincidunt ac felis. Curabitur tincidunt lorem in lorem
+            sodales, sit amet consectetur leo scelerisque. Phasellus malesuada
+            condimentum imperdiet.
+          </p>
+
+          <p>
+            Maecenas ac leo nisl. Vivamus nulla lorem, gravida sed posuere a,
+            ornare sit amet lacus. Nulla vulputate libero purus, in ornare diam
+            varius et. In sodales odio felis, ac venenatis ligula tristique sed.
+            Praesent dapibus, libero id varius suscipit, nunc mauris condimentum
+            leo, placerat placerat turpis velit vel tortor. Nulla sagittis
+            mauris eu nibh scelerisque, a efficitur mi rutrum. Cras ut massa
+            dignissim, dignissim dolor sit amet, tincidunt lorem.
+          </p>
+
+          <p>
+            Mauris condimentum ornare dolor, id pellentesque libero finibus eu.
+            Donec cursus, dolor sed fringilla accumsan, ante metus malesuada
+            dolor, vel tincidunt dui diam pharetra orci. Nullam tortor velit,
+            elementum at ultrices vitae, condimentum in neque. Mauris mollis
+            ligula magna, vel efficitur nulla maximus et. Curabitur sed augue id
+            nibh placerat tristique non id felis. Vestibulum nibh tellus,
+            lobortis ut leo at, tristique gravida augue. Phasellus mollis
+            porttitor lectus sit amet pellentesque. Vestibulum ornare massa
+            ligula, at consectetur nisi convallis eget. Mauris tincidunt sapien
+            at lorem tincidunt, sed auctor risus auctor. Sed tellus ligula,
+            tincidunt a dictum sit amet, tristique a nulla.
+          </p>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. In id
+            congue lorem. Proin porttitor nunc eu convallis faucibus. Mauris in
+            turpis tortor. Nullam condimentum consectetur urna, sed placerat
+            diam vehicula eu. In lacinia laoreet dui, sed tempus diam semper eu.
+            Quisque imperdiet, diam vitae volutpat tempus, justo mi egestas
+            arcu, sed tempor neque velit pulvinar elit. Integer felis velit,
+            sagittis ac accumsan in, vulputate sit amet augue. Phasellus
+            interdum, mi sed pharetra dignissim, tortor augue tristique eros, et
+            porttitor tellus lacus et magna. Curabitur sed vulputate urna.
+            Aliquam eget ligula nunc. Class aptent taciti sociosqu ad litora
+            torquent per conubia nostra, per inceptos himenaeos. Cras feugiat
+            nibh eu tortor accumsan, vel iaculis purus suscipit. Aliquam
+            sagittis mauris orci, sed feugiat urna elementum nec.
+          </p>
+
+          <p>
+            Mauris vestibulum mauris eget pharetra volutpat. Sed cursus sit amet
+            sapien ac bibendum. In ut luctus velit, quis fringilla lectus.
+            Vivamus at molestie ligula, pulvinar maximus libero. Aliquam luctus
+            arcu quis ligula rhoncus, at mattis neque blandit. Morbi at risus
+            mattis, cursus dolor vitae, accumsan eros. Aliquam gravida malesuada
+            sem, vitae tincidunt sem vehicula quis. Maecenas dignissim auctor
+            neque, sollicitudin sollicitudin turpis interdum quis. Donec orci
+            purus, imperdiet ac dapibus et, aliquam id nisl. Maecenas porta leo
+            id lacus semper, eu aliquam ligula tristique.
+          </p>
+
+          <p>
+            Nam mollis volutpat est, ut vestibulum nisi interdum sit amet.
+            Praesent pharetra purus porttitor risus consequat, sed vulputate
+            ligula congue. Donec rutrum dolor vitae blandit tempor. Sed accumsan
+            congue mauris at vehicula. Cras quam ex, lacinia et sagittis
+            viverra, tincidunt ac felis. Curabitur tincidunt lorem in lorem
+            sodales, sit amet consectetur leo scelerisque. Phasellus malesuada
+            condimentum imperdiet.
+          </p>
+
+          <p>
+            Maecenas ac leo nisl. Vivamus nulla lorem, gravida sed posuere a,
+            ornare sit amet lacus. Nulla vulputate libero purus, in ornare diam
+            varius et. In sodales odio felis, ac venenatis ligula tristique sed.
+            Praesent dapibus, libero id varius suscipit, nunc mauris condimentum
+            leo, placerat placerat turpis velit vel tortor. Nulla sagittis
+            mauris eu nibh scelerisque, a efficitur mi rutrum. Cras ut massa
+            dignissim, dignissim dolor sit amet, tincidunt lorem.
+          </p>
+
+          <p>
+            Mauris condimentum ornare dolor, id pellentesque libero finibus eu.
+            Donec cursus, dolor sed fringilla accumsan, ante metus malesuada
+            dolor, vel tincidunt dui diam pharetra orci. Nullam tortor velit,
+            elementum at ultrices vitae, condimentum in neque. Mauris mollis
+            ligula magna, vel efficitur nulla maximus et. Curabitur sed augue id
+            nibh placerat tristique non id felis. Vestibulum nibh tellus,
+            lobortis ut leo at, tristique gravida augue. Phasellus mollis
+            porttitor lectus sit amet pellentesque. Vestibulum ornare massa
+            ligula, at consectetur nisi convallis eget. Mauris tincidunt sapien
+            at lorem tincidunt, sed auctor risus auctor. Sed tellus ligula,
+            tincidunt a dictum sit amet, tristique a nulla.
+          </p>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. In id
+            congue lorem. Proin porttitor nunc eu convallis faucibus. Mauris in
+            turpis tortor. Nullam condimentum consectetur urna, sed placerat
+            diam vehicula eu. In lacinia laoreet dui, sed tempus diam semper eu.
+            Quisque imperdiet, diam vitae volutpat tempus, justo mi egestas
+            arcu, sed tempor neque velit pulvinar elit. Integer felis velit,
+            sagittis ac accumsan in, vulputate sit amet augue. Phasellus
+            interdum, mi sed pharetra dignissim, tortor augue tristique eros, et
+            porttitor tellus lacus et magna. Curabitur sed vulputate urna.
+            Aliquam eget ligula nunc. Class aptent taciti sociosqu ad litora
+            torquent per conubia nostra, per inceptos himenaeos. Cras feugiat
+            nibh eu tortor accumsan, vel iaculis purus suscipit. Aliquam
+            sagittis mauris orci, sed feugiat urna elementum nec.
+          </p>
+
+          <p>
+            Mauris vestibulum mauris eget pharetra volutpat. Sed cursus sit amet
+            sapien ac bibendum. In ut luctus velit, quis fringilla lectus.
+            Vivamus at molestie ligula, pulvinar maximus libero. Aliquam luctus
+            arcu quis ligula rhoncus, at mattis neque blandit. Morbi at risus
+            mattis, cursus dolor vitae, accumsan eros. Aliquam gravida malesuada
+            sem, vitae tincidunt sem vehicula quis. Maecenas dignissim auctor
+            neque, sollicitudin sollicitudin turpis interdum quis. Donec orci
+            purus, imperdiet ac dapibus et, aliquam id nisl. Maecenas porta leo
+            id lacus semper, eu aliquam ligula tristique.
+          </p>
+
+          <p>
+            Nam mollis volutpat est, ut vestibulum nisi interdum sit amet.
+            Praesent pharetra purus porttitor risus consequat, sed vulputate
+            ligula congue. Donec rutrum dolor vitae blandit tempor. Sed accumsan
+            congue mauris at vehicula. Cras quam ex, lacinia et sagittis
+            viverra, tincidunt ac felis. Curabitur tincidunt lorem in lorem
+            sodales, sit amet consectetur leo scelerisque. Phasellus malesuada
+            condimentum imperdiet.
+          </p>
+
+          <p>
+            Maecenas ac leo nisl. Vivamus nulla lorem, gravida sed posuere a,
+            ornare sit amet lacus. Nulla vulputate libero purus, in ornare diam
+            varius et. In sodales odio felis, ac venenatis ligula tristique sed.
+            Praesent dapibus, libero id varius suscipit, nunc mauris condimentum
+            leo, placerat placerat turpis velit vel tortor. Nulla sagittis
+            mauris eu nibh scelerisque, a efficitur mi rutrum. Cras ut massa
+            dignissim, dignissim dolor sit amet, tincidunt lorem.
+          </p>
+
+          <p>
+            Mauris condimentum ornare dolor, id pellentesque libero finibus eu.
+            Donec cursus, dolor sed fringilla accumsan, ante metus malesuada
+            dolor, vel tincidunt dui diam pharetra orci. Nullam tortor velit,
+            elementum at ultrices vitae, condimentum in neque. Mauris mollis
+            ligula magna, vel efficitur nulla maximus et. Curabitur sed augue id
+            nibh placerat tristique non id felis. Vestibulum nibh tellus,
+            lobortis ut leo at, tristique gravida augue. Phasellus mollis
+            porttitor lectus sit amet pellentesque. Vestibulum ornare massa
+            ligula, at consectetur nisi convallis eget. Mauris tincidunt sapien
+            at lorem tincidunt, sed auctor risus auctor. Sed tellus ligula,
+            tincidunt a dictum sit amet, tristique a nulla.
+          </p>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. In id
+            congue lorem. Proin porttitor nunc eu convallis faucibus. Mauris in
+            turpis tortor. Nullam condimentum consectetur urna, sed placerat
+            diam vehicula eu. In lacinia laoreet dui, sed tempus diam semper eu.
+            Quisque imperdiet, diam vitae volutpat tempus, justo mi egestas
+            arcu, sed tempor neque velit pulvinar elit. Integer felis velit,
+            sagittis ac accumsan in, vulputate sit amet augue. Phasellus
+            interdum, mi sed pharetra dignissim, tortor augue tristique eros, et
+            porttitor tellus lacus et magna. Curabitur sed vulputate urna.
+            Aliquam eget ligula nunc. Class aptent taciti sociosqu ad litora
+            torquent per conubia nostra, per inceptos himenaeos. Cras feugiat
+            nibh eu tortor accumsan, vel iaculis purus suscipit. Aliquam
+            sagittis mauris orci, sed feugiat urna elementum nec.
+          </p>
+
+          <p>
+            Mauris vestibulum mauris eget pharetra volutpat. Sed cursus sit amet
+            sapien ac bibendum. In ut luctus velit, quis fringilla lectus.
+            Vivamus at molestie ligula, pulvinar maximus libero. Aliquam luctus
+            arcu quis ligula rhoncus, at mattis neque blandit. Morbi at risus
+            mattis, cursus dolor vitae, accumsan eros. Aliquam gravida malesuada
+            sem, vitae tincidunt sem vehicula quis. Maecenas dignissim auctor
+            neque, sollicitudin sollicitudin turpis interdum quis. Donec orci
+            purus, imperdiet ac dapibus et, aliquam id nisl. Maecenas porta leo
+            id lacus semper, eu aliquam ligula tristique.
+          </p>
+
+          <p>
+            Nam mollis volutpat est, ut vestibulum nisi interdum sit amet.
+            Praesent pharetra purus porttitor risus consequat, sed vulputate
+            ligula congue. Donec rutrum dolor vitae blandit tempor. Sed accumsan
+            congue mauris at vehicula. Cras quam ex, lacinia et sagittis
+            viverra, tincidunt ac felis. Curabitur tincidunt lorem in lorem
+            sodales, sit amet consectetur leo scelerisque. Phasellus malesuada
+            condimentum imperdiet.
+          </p>
+
+          <p>
+            Maecenas ac leo nisl. Vivamus nulla lorem, gravida sed posuere a,
+            ornare sit amet lacus. Nulla vulputate libero purus, in ornare diam
+            varius et. In sodales odio felis, ac venenatis ligula tristique sed.
+            Praesent dapibus, libero id varius suscipit, nunc mauris condimentum
+            leo, placerat placerat turpis velit vel tortor. Nulla sagittis
+            mauris eu nibh scelerisque, a efficitur mi rutrum. Cras ut massa
+            dignissim, dignissim dolor sit amet, tincidunt lorem.
+          </p>
+
+          <p>
+            Mauris condimentum ornare dolor, id pellentesque libero finibus eu.
+            Donec cursus, dolor sed fringilla accumsan, ante metus malesuada
+            dolor, vel tincidunt dui diam pharetra orci. Nullam tortor velit,
+            elementum at ultrices vitae, condimentum in neque. Mauris mollis
+            ligula magna, vel efficitur nulla maximus et. Curabitur sed augue id
+            nibh placerat tristique non id felis. Vestibulum nibh tellus,
+            lobortis ut leo at, tristique gravida augue. Phasellus mollis
+            porttitor lectus sit amet pellentesque. Vestibulum ornare massa
+            ligula, at consectetur nisi convallis eget. Mauris tincidunt sapien
+            at lorem tincidunt, sed auctor risus auctor. Sed tellus ligula,
+            tincidunt a dictum sit amet, tristique a nulla.
+          </p>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. In id
+            congue lorem. Proin porttitor nunc eu convallis faucibus. Mauris in
+            turpis tortor. Nullam condimentum consectetur urna, sed placerat
+            diam vehicula eu. In lacinia laoreet dui, sed tempus diam semper eu.
+            Quisque imperdiet, diam vitae volutpat tempus, justo mi egestas
+            arcu, sed tempor neque velit pulvinar elit. Integer felis velit,
+            sagittis ac accumsan in, vulputate sit amet augue. Phasellus
+            interdum, mi sed pharetra dignissim, tortor augue tristique eros, et
+            porttitor tellus lacus et magna. Curabitur sed vulputate urna.
+            Aliquam eget ligula nunc. Class aptent taciti sociosqu ad litora
+            torquent per conubia nostra, per inceptos himenaeos. Cras feugiat
+            nibh eu tortor accumsan, vel iaculis purus suscipit. Aliquam
+            sagittis mauris orci, sed feugiat urna elementum nec.
+          </p>
+
+          <p>
+            Mauris vestibulum mauris eget pharetra volutpat. Sed cursus sit amet
+            sapien ac bibendum. In ut luctus velit, quis fringilla lectus.
+            Vivamus at molestie ligula, pulvinar maximus libero. Aliquam luctus
+            arcu quis ligula rhoncus, at mattis neque blandit. Morbi at risus
+            mattis, cursus dolor vitae, accumsan eros. Aliquam gravida malesuada
+            sem, vitae tincidunt sem vehicula quis. Maecenas dignissim auctor
+            neque, sollicitudin sollicitudin turpis interdum quis. Donec orci
+            purus, imperdiet ac dapibus et, aliquam id nisl. Maecenas porta leo
+            id lacus semper, eu aliquam ligula tristique.
+          </p>
+
+          <p>
+            Nam mollis volutpat est, ut vestibulum nisi interdum sit amet.
+            Praesent pharetra purus porttitor risus consequat, sed vulputate
+            ligula congue. Donec rutrum dolor vitae blandit tempor. Sed accumsan
+            congue mauris at vehicula. Cras quam ex, lacinia et sagittis
+            viverra, tincidunt ac felis. Curabitur tincidunt lorem in lorem
+            sodales, sit amet consectetur leo scelerisque. Phasellus malesuada
+            condimentum imperdiet.
+          </p>
+
+          <p>
+            Maecenas ac leo nisl. Vivamus nulla lorem, gravida sed posuere a,
+            ornare sit amet lacus. Nulla vulputate libero purus, in ornare diam
+            varius et. In sodales odio felis, ac venenatis ligula tristique sed.
+            Praesent dapibus, libero id varius suscipit, nunc mauris condimentum
+            leo, placerat placerat turpis velit vel tortor. Nulla sagittis
+            mauris eu nibh scelerisque, a efficitur mi rutrum. Cras ut massa
+            dignissim, dignissim dolor sit amet, tincidunt lorem.
+          </p>
+
+          <p>
+            Mauris condimentum ornare dolor, id pellentesque libero finibus eu.
+            Donec cursus, dolor sed fringilla accumsan, ante metus malesuada
+            dolor, vel tincidunt dui diam pharetra orci. Nullam tortor velit,
+            elementum at ultrices vitae, condimentum in neque. Mauris mollis
+            ligula magna, vel efficitur nulla maximus et. Curabitur sed augue id
+            nibh placerat tristique non id felis. Vestibulum nibh tellus,
+            lobortis ut leo at, tristique gravida augue. Phasellus mollis
+            porttitor lectus sit amet pellentesque. Vestibulum ornare massa
+            ligula, at consectetur nisi convallis eget. Mauris tincidunt sapien
+            at lorem tincidunt, sed auctor risus auctor. Sed tellus ligula,
+            tincidunt a dictum sit amet, tristique a nulla.
+          </p>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. In id
+            congue lorem. Proin porttitor nunc eu convallis faucibus. Mauris in
+            turpis tortor. Nullam condimentum consectetur urna, sed placerat
+            diam vehicula eu. In lacinia laoreet dui, sed tempus diam semper eu.
+            Quisque imperdiet, diam vitae volutpat tempus, justo mi egestas
+            arcu, sed tempor neque velit pulvinar elit. Integer felis velit,
+            sagittis ac accumsan in, vulputate sit amet augue. Phasellus
+            interdum, mi sed pharetra dignissim, tortor augue tristique eros, et
+            porttitor tellus lacus et magna. Curabitur sed vulputate urna.
+            Aliquam eget ligula nunc. Class aptent taciti sociosqu ad litora
+            torquent per conubia nostra, per inceptos himenaeos. Cras feugiat
+            nibh eu tortor accumsan, vel iaculis purus suscipit. Aliquam
+            sagittis mauris orci, sed feugiat urna elementum nec.
+          </p>
+
+          <p>
+            Mauris vestibulum mauris eget pharetra volutpat. Sed cursus sit amet
+            sapien ac bibendum. In ut luctus velit, quis fringilla lectus.
+            Vivamus at molestie ligula, pulvinar maximus libero. Aliquam luctus
+            arcu quis ligula rhoncus, at mattis neque blandit. Morbi at risus
+            mattis, cursus dolor vitae, accumsan eros. Aliquam gravida malesuada
+            sem, vitae tincidunt sem vehicula quis. Maecenas dignissim auctor
+            neque, sollicitudin sollicitudin turpis interdum quis. Donec orci
+            purus, imperdiet ac dapibus et, aliquam id nisl. Maecenas porta leo
+            id lacus semper, eu aliquam ligula tristique.
+          </p>
+
+          <p>
+            Nam mollis volutpat est, ut vestibulum nisi interdum sit amet.
+            Praesent pharetra purus porttitor risus consequat, sed vulputate
+            ligula congue. Donec rutrum dolor vitae blandit tempor. Sed accumsan
+            congue mauris at vehicula. Cras quam ex, lacinia et sagittis
+            viverra, tincidunt ac felis. Curabitur tincidunt lorem in lorem
+            sodales, sit amet consectetur leo scelerisque. Phasellus malesuada
+            condimentum imperdiet.
+          </p>
+
+          <p>
+            Maecenas ac leo nisl. Vivamus nulla lorem, gravida sed posuere a,
+            ornare sit amet lacus. Nulla vulputate libero purus, in ornare diam
+            varius et. In sodales odio felis, ac venenatis ligula tristique sed.
+            Praesent dapibus, libero id varius suscipit, nunc mauris condimentum
+            leo, placerat placerat turpis velit vel tortor. Nulla sagittis
+            mauris eu nibh scelerisque, a efficitur mi rutrum. Cras ut massa
+            dignissim, dignissim dolor sit amet, tincidunt lorem.
+          </p>
+
+          <p>
+            Mauris condimentum ornare dolor, id pellentesque libero finibus eu.
+            Donec cursus, dolor sed fringilla accumsan, ante metus malesuada
+            dolor, vel tincidunt dui diam pharetra orci. Nullam tortor velit,
+            elementum at ultrices vitae, condimentum in neque. Mauris mollis
+            ligula magna, vel efficitur nulla maximus et. Curabitur sed augue id
+            nibh placerat tristique non id felis. Vestibulum nibh tellus,
+            lobortis ut leo at, tristique gravida augue. Phasellus mollis
+            porttitor lectus sit amet pellentesque. Vestibulum ornare massa
+            ligula, at consectetur nisi convallis eget. Mauris tincidunt sapien
+            at lorem tincidunt, sed auctor risus auctor. Sed tellus ligula,
+            tincidunt a dictum sit amet, tristique a nulla.
+          </p>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. In id
+            congue lorem. Proin porttitor nunc eu convallis faucibus. Mauris in
+            turpis tortor. Nullam condimentum consectetur urna, sed placerat
+            diam vehicula eu. In lacinia laoreet dui, sed tempus diam semper eu.
+            Quisque imperdiet, diam vitae volutpat tempus, justo mi egestas
+            arcu, sed tempor neque velit pulvinar elit. Integer felis velit,
+            sagittis ac accumsan in, vulputate sit amet augue. Phasellus
+            interdum, mi sed pharetra dignissim, tortor augue tristique eros, et
+            porttitor tellus lacus et magna. Curabitur sed vulputate urna.
+            Aliquam eget ligula nunc. Class aptent taciti sociosqu ad litora
+            torquent per conubia nostra, per inceptos himenaeos. Cras feugiat
+            nibh eu tortor accumsan, vel iaculis purus suscipit. Aliquam
+            sagittis mauris orci, sed feugiat urna elementum nec.
+          </p>
+
+          <p>
+            Mauris vestibulum mauris eget pharetra volutpat. Sed cursus sit amet
+            sapien ac bibendum. In ut luctus velit, quis fringilla lectus.
+            Vivamus at molestie ligula, pulvinar maximus libero. Aliquam luctus
+            arcu quis ligula rhoncus, at mattis neque blandit. Morbi at risus
+            mattis, cursus dolor vitae, accumsan eros. Aliquam gravida malesuada
+            sem, vitae tincidunt sem vehicula quis. Maecenas dignissim auctor
+            neque, sollicitudin sollicitudin turpis interdum quis. Donec orci
+            purus, imperdiet ac dapibus et, aliquam id nisl. Maecenas porta leo
+            id lacus semper, eu aliquam ligula tristique.
+          </p>
+
+          <p>
+            Nam mollis volutpat est, ut vestibulum nisi interdum sit amet.
+            Praesent pharetra purus porttitor risus consequat, sed vulputate
+            ligula congue. Donec rutrum dolor vitae blandit tempor. Sed accumsan
+            congue mauris at vehicula. Cras quam ex, lacinia et sagittis
+            viverra, tincidunt ac felis. Curabitur tincidunt lorem in lorem
+            sodales, sit amet consectetur leo scelerisque. Phasellus malesuada
+            condimentum imperdiet.
+          </p>
+
+          <p>
+            Maecenas ac leo nisl. Vivamus nulla lorem, gravida sed posuere a,
+            ornare sit amet lacus. Nulla vulputate libero purus, in ornare diam
+            varius et. In sodales odio felis, ac venenatis ligula tristique sed.
+            Praesent dapibus, libero id varius suscipit, nunc mauris condimentum
+            leo, placerat placerat turpis velit vel tortor. Nulla sagittis
+            mauris eu nibh scelerisque, a efficitur mi rutrum. Cras ut massa
+            dignissim, dignissim dolor sit amet, tincidunt lorem.
+          </p>
+
+          <p>
+            Mauris condimentum ornare dolor, id pellentesque libero finibus eu.
+            Donec cursus, dolor sed fringilla accumsan, ante metus malesuada
+            dolor, vel tincidunt dui diam pharetra orci. Nullam tortor velit,
+            elementum at ultrices vitae, condimentum in neque. Mauris mollis
+            ligula magna, vel efficitur nulla maximus et. Curabitur sed augue id
+            nibh placerat tristique non id felis. Vestibulum nibh tellus,
+            lobortis ut leo at, tristique gravida augue. Phasellus mollis
+            porttitor lectus sit amet pellentesque. Vestibulum ornare massa
+            ligula, at consectetur nisi convallis eget. Mauris tincidunt sapien
+            at lorem tincidunt, sed auctor risus auctor. Sed tellus ligula,
+            tincidunt a dictum sit amet, tristique a nulla.
+          </p>
+        </div>
+      </div>
+    </div>
+    <h2>Bookmarklet Code</h2>
+    <p>
+      This is the JavaScript code embedded within the bookmarklet link above:
+
+      <div class="warning">
+        <i class="fa-solid fa-triangle-exclamation fa-lg"></i>
+        Understanding what you're running is key to security and
+        trust. Take a moment to review the actual source code before execution.
+      </div>
+    </p>
+    <pre><code id="bookmarklet-code-display"></code></pre>
+
+    <script>
+      // --- Core Event Logging Logic (to be embedded in bookmarklet) ---
+      const coreLogic = function () {
+        // Prevent running multiple times on the same page
+        if (window._eventLoggerActive) {
+          console.warn("Event logger is already active on this page.");
+          return;
+        }
+        window._eventLoggerActive = true;
+
+        // --- Define Constants and Styles ---
+        const ScrollType = {
+          PINCH_ZOOM: "pinchZoom",
+          TRACKPAD: "trackpad",
+          WHEEL: "wheel",
+        };
+        const labelStyle =
+          "background: #4966ff; border-radius: 4px; font-weight: bold; color: #e2e8fc; padding: 1px 4px; margin: 0 2px;";
+        const normalStyle =
+          "font-weight: normal; background: none; color: inherit; padding: 0; margin: 0;";
+
+        // --- Helper Functions ---
+        function isTrackPadEvent(event) {
+          const { deltaY } = event;
+          if (typeof deltaY === "undefined" || deltaY === null) return false;
+          // Heuristic: Small, integer deltaY values often indicate trackpad scrolling.
+          // Non-integer or large values are more likely wheel events.
+          // This isn't perfect but covers many common cases.
+          return Math.abs(deltaY) < 50 && Number.isInteger(deltaY);
+        }
+
+        function determineScrollType(event) {
+          // Ctrl key + wheel often means pinch zoom
+          if (event.ctrlKey) return ScrollType.PINCH_ZOOM;
+          // Significant horizontal scroll usually means trackpad swipe
+          if (
+            Math.abs(event.deltaX) > Math.abs(event.deltaY) / 2 &&
+            Math.abs(event.deltaX) > 0
+          )
+            return ScrollType.TRACKPAD;
+          // Check if it fits the trackpad heuristic
+          if (isTrackPadEvent(event)) return ScrollType.TRACKPAD;
+          // Otherwise, assume it's a standard wheel
+          return ScrollType.WHEEL;
+        }
+
+        function logEventDetails(event, labelStyle, normalStyle) {
+          const logDetails = {
+            type: event.type,
+            modifiers: [],
+            properties: {},
+          };
+          const targetElement = event.target; // Keep reference to the target
+
+          // --- Capture Modifiers ---
+          if (event.shiftKey) logDetails.modifiers.push("Shift");
+          if (event.ctrlKey) logDetails.modifiers.push("Ctrl");
+          if (event.altKey) logDetails.modifiers.push("Alt");
+          if (event.metaKey) logDetails.modifiers.push("Meta"); // Command key on Mac, Windows key on Win
+
+          // --- Capture Event-Specific Properties ---
+          const type = event.type;
+
+          // Mouse, Click, Context Menu, Pointer Events
+          if (
+            type.includes("mouse") ||
+            type.includes("click") ||
+            type.includes("contextmenu") ||
+            type.includes("pointer")
+          ) {
+            if (typeof event.clientX !== "undefined")
+              logDetails.properties.Coords = `(clientX: ${event.clientX}, clientY: ${event.clientY})`;
+            // Log button only for relevant events (down, up, click)
+            if (
+              typeof event.button !== "undefined" &&
+              (type.includes("down") ||
+                type.includes("up") ||
+                type.includes("click"))
+            )
+              logDetails.properties.Button = event.button; // 0: main, 1: middle, 2: right
+            if (typeof event.pointerType !== "undefined")
+              logDetails.properties.PointerType = event.pointerType; // e.g., 'mouse', 'pen', 'touch'
+          }
+
+          // Keyboard Events
+          if (type.includes("key")) {
+            if (event.key) logDetails.properties.Key = event.key; // e.g., 'a', 'Enter', 'Shift'
+            if (event.code) logDetails.properties.Code = event.code; // e.g., 'KeyA', 'Enter', 'ShiftLeft'
+            if (type === "keydown" && typeof event.repeat !== "undefined")
+              logDetails.properties.Repeat = event.repeat; // true if key is held down
+          }
+
+          // Wheel Events
+          if (type === "wheel") {
+            const wheelEvent = /** @type {WheelEvent} */ (event); // Cast for type safety (optional)
+            logDetails.properties.IsTrackpad = isTrackPadEvent(wheelEvent);
+            logDetails.properties.ScrollType = determineScrollType(wheelEvent);
+            logDetails.properties.Delta = `(X: ${wheelEvent.deltaX}, Y: ${wheelEvent.deltaY}, Z: ${wheelEvent.deltaZ})`;
+            logDetails.properties.DeltaMode = `${wheelEvent.deltaMode} (${
+              wheelEvent.deltaMode === 0
+                ? "px"
+                : wheelEvent.deltaMode === 1
+                ? "lines"
+                : "pages"
+            })`;
+          }
+
+          // Input & Change Events (for form elements)
+          if (
+            (type === "input" || type === "change") &&
+            targetElement instanceof Element && // Check if target is an Element
+            typeof targetElement.value === "string" // Check if it has a 'value' property (like input, select, textarea)
+          ) {
+            let value = targetElement.value;
+            // Truncate long values for cleaner logs
+            if (value.length > 50) value = value.substring(0, 47) + "...";
+            logDetails.properties.Value = `"${value}"`;
+          }
+
+          // Touch Events
+          if (type.startsWith("touch")) {
+            if (event.touches)
+              logDetails.properties.Touches = event.touches.length; // Fingers currently on screen
+            if (event.changedTouches)
+              logDetails.properties.Changed = event.changedTouches.length; // Fingers involved in this event
+          }
+
+          // Focus & Blur Events
+          if (
+            (type === "focus" || type === "blur") &&
+            event.relatedTarget instanceof Element // Check if relatedTarget exists and is an Element
+          ) {
+            const related = event.relatedTarget;
+            // Provide basic info about the related element (where focus came from/went to)
+            logDetails.properties.RelatedTarget = `${related.tagName}${
+              related.id ? "#" + related.id : ""
+            }`;
+          }
+
+          // --- Format and Log Output ---
+          let formatString = "%cEvent:%c " + logDetails.type;
+          let styles = [labelStyle, normalStyle];
+          let objectsToLog = []; // Array to hold objects (like the raw event) for console inspection
+
+          // Add Modifiers if any
+          if (logDetails.modifiers.length > 0) {
+            formatString +=
+              "%c (Modifiers:%c " + logDetails.modifiers.join("+") + ")";
+            styles.push(labelStyle, normalStyle);
+          }
+
+          // Add Properties
+          for (const [key, value] of Object.entries(logDetails.properties)) {
+            formatString += ` | %c${key}:%c ${value}`;
+            styles.push(labelStyle, normalStyle);
+          }
+
+          // Add Target Element Info
+          if (targetElement instanceof Element) {
+            formatString += ` | %cTarget:%c ${targetElement.tagName}${
+              targetElement.id ? "#" + targetElement.id : ""
+            }${
+              targetElement.className
+                ? "." + targetElement.className.split(" ").join(".")
+                : ""
+            }`;
+            styles.push(labelStyle, normalStyle);
+          }
+
+          // Add Raw Event Object Last for inspection
+          formatString += ` | %cRaw Event:%c`;
+          styles.push(labelStyle, ""); // No style for the object itself
+          objectsToLog.push(event);
+
+          // Assemble arguments for console.log
+          let logArgs = [formatString, ...styles, ...objectsToLog];
+
+          // Log to the console
+          console.log(...logArgs);
+        }
+
+        // --- Attach Listeners to the Document ---
+        function logAllDocumentEvents() {
+          const events = [
+            // Mouse Events
+            "click",
+            "dblclick",
+            "mousedown",
+            "mouseup",
+            "mousemove",
+            // "mouseover", // Often too noisy
+            // "mouseout", // Often too noisy
+            "mouseenter",
+            "mouseleave",
+            "contextmenu", // Right-click
+
+            // Keyboard Events
+            "keydown",
+            "keyup",
+            // "keypress", // Deprecated, use keydown/keyup
+
+            // Focus Events
+            "focus",
+            "blur",
+
+            // Form Events
+            "change", // Value change committed (e.g., select dropdown, checkbox)
+            "input", // Value change as it happens (e.g., text input)
+            "submit", // Form submission
+
+            // Window/Document Events
+            "scroll", // Can be noisy, but useful
+            "resize", // Window resize
+
+            // Touch Events
+            "touchstart",
+            "touchmove",
+            "touchend",
+            "touchcancel",
+
+            // Pointer Events (Modern replacement for mouse/touch)
+            "pointerdown",
+            "pointermove",
+            "pointerup",
+            "pointerover",
+            "pointerout",
+            "pointerenter",
+            "pointerleave",
+            "pointercancel",
+
+            // Drag & Drop Events
+            "dragstart",
+            "drag",
+            "dragenter",
+            "dragleave",
+            "dragover",
+            "drop",
+            "dragend",
+
+            // Clipboard Events
+            "copy",
+            "cut",
+            "paste",
+
+            // Animation & Transition Events (Can be noisy)
+            // "animationstart",
+            // "animationiteration",
+            // "animationend",
+            // "transitionstart",
+            // "transitionrun",
+            // "transitionend",
+            // "transitioncancel",
+
+            // Wheel Events (Scrolling)
+            "wheel",
+          ];
+
+          events.forEach((eventType) => {
+            // Use capture phase for some events if needed, but bubbling (false) is usually fine
+            // Use passive: true where possible to improve scroll performance
+            document.addEventListener(
+              eventType,
+              (event) => {
+                // Basic check to avoid logging events triggered by the bookmarklet link itself
+                if (
+                  event.target &&
+                  event.target.closest && // Ensure closest method exists
+                  event.target.closest("#bookmarklet")
+                ) {
+                  return;
+                }
+                logEventDetails(event, labelStyle, normalStyle);
+              },
+              { passive: true, capture: false } // Use capture: true for events like focus/blur if needed on outer elements
+            );
+          });
+
+          // Initial log message
+          console.log(
+            "%cEvent Logger Activated",
+            "color: green; font-weight: bold; font-size: 1.1em;"
+          );
+          console.log(
+            "Logging events on the document. Interact with the page (or the demo area) to see logs."
+          );
+        }
+
+        // --- Run the logger ---
+        logAllDocumentEvents();
+      }; // End of coreLogic function definition
+
+      // --- Create the Bookmarklet Link ---
+      // Convert the function to a string, wrap in an IIFE (Immediately Invoked Function Expression)
+      // Encode the string for use in a URL href
+      const bookmarkletCode = `javascript:(${coreLogic.toString()})();`;
+      // Encode URI components, but specifically handle '#' which encodeURI doesn't touch
+      const encodedBookmarkletCode = encodeURI(bookmarkletCode).replace(
+        /#/g,
+        "%23"
+      );
+
+      // Set the href attribute of the bookmarklet link
+      const linkElement = document.getElementById("bookmarklet");
+      if (linkElement) {
+        linkElement.href = encodedBookmarkletCode;
+      }
+
+      // Display the raw, readable code in the <pre><code> block for reference
+      const codeDisplayElement = document.getElementById(
+        "bookmarklet-code-display"
+      );
+      if (codeDisplayElement) {
+        codeDisplayElement.textContent = `( ${coreLogic.toString()} )();`;
+      }
+    </script>
+  </body>
+</html>
